@@ -1,12 +1,17 @@
 import { useState } from 'react';
-import { Search, Filter, Plus, Edit2, Trash2, MoreVertical } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Upload, Eye } from 'lucide-react';
 import { mockProducts, mockCategories } from '@/data/mockData';
 import { useRole } from '@/contexts/RoleContext';
-import { cn } from '@/lib/utils';
+import CSVImportModal from './CSVImportModal';
 
-export default function ProductsTable() {
+interface ProductsTableProps {
+  onViewProduct?: (productId: string) => void;
+}
+
+export default function ProductsTable({ onViewProduct }: ProductsTableProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const { hasPermission } = useRole();
 
   const canManageProducts = hasPermission(['admin', 'manager']);
@@ -39,10 +44,19 @@ export default function ProductsTable() {
           </div>
 
           {canManageProducts && (
-            <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm">
-              <Plus className="w-4 h-4" />
-              Add Product
-            </button>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setIsImportModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-secondary border border-border text-foreground rounded-lg hover:bg-secondary/80 transition-colors font-medium text-sm"
+              >
+                <Upload className="w-4 h-4" />
+                Import CSV
+              </button>
+              <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm">
+                <Plus className="w-4 h-4" />
+                Add Product
+              </button>
+            </div>
           )}
         </div>
 
@@ -93,7 +107,7 @@ export default function ProductsTable() {
               const stockStatus = getStockStatus(product.quantityInStock, product.lowStockThreshold);
               
               return (
-                <tr key={product.id} className="table-row-hover">
+                <tr key={product.id} className="table-row-hover cursor-pointer" onClick={() => onViewProduct?.(product.id)}>
                   <td className="px-6 py-4">
                     <div>
                       <p className="text-sm font-medium text-foreground">{product.name}</p>
@@ -115,18 +129,26 @@ export default function ProductsTable() {
                   <td className="px-6 py-4">
                     <span className="text-sm text-muted-foreground">{product.supplier}</span>
                   </td>
-                  {canManageProducts && (
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button className="p-2 rounded-lg hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-colors">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  )}
+                  <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center justify-end gap-2">
+                      <button 
+                        onClick={() => onViewProduct?.(product.id)}
+                        className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      {canManageProducts && (
+                        <>
+                          <button className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button className="p-2 rounded-lg hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-colors">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </td>
                 </tr>
               );
             })}
@@ -152,6 +174,8 @@ export default function ProductsTable() {
           </button>
         </div>
       </div>
+
+      <CSVImportModal isOpen={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} />
     </div>
   );
 }
