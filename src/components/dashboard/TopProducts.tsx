@@ -1,0 +1,52 @@
+import { TrendingUp } from 'lucide-react';
+import { topProductsData } from '@/data/mockData';
+
+export default function TopProducts() {
+  const maxSales = Math.max(...topProductsData.map(p => p.sales));
+
+  return (
+    <div className="bg-card border border-border rounded-xl animate-fade-in" style={{ animationDelay: '350ms' }}>
+      <div className="p-6 border-b border-border">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+            <TrendingUp className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-foreground">Top Products</h3>
+            <p className="text-sm text-muted-foreground">Best selling items this month</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-6 space-y-4">
+        {topProductsData.map((product, index) => {
+          const percentage = (product.sales / maxSales) * 100;
+          
+          return (
+            <div key={index}>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-3">
+                  <span className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center text-xs font-medium text-muted-foreground">
+                    {index + 1}
+                  </span>
+                  <span className="text-sm font-medium text-foreground truncate">{product.name}</span>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-semibold text-foreground">${product.revenue.toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground">{product.sales} sales</p>
+                </div>
+              </div>
+              
+              <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-primary rounded-full transition-all duration-700"
+                  style={{ width: `${percentage}%` }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
