@@ -10,6 +10,7 @@ import Reports from '@/pages/Reports';
 import Categories from '@/pages/Categories';
 import Users from '@/pages/Users';
 import Settings from '@/pages/Settings';
+import Profile from '@/pages/Profile';
 
 const pageTitles: Record<string, { title: string; subtitle: string }> = {
   dashboard: { title: 'Dashboard', subtitle: 'Overview of your inventory management' },
@@ -20,6 +21,7 @@ const pageTitles: Record<string, { title: string; subtitle: string }> = {
   categories: { title: 'Categories', subtitle: 'Organize your products' },
   users: { title: 'User Management', subtitle: 'Manage users and permissions' },
   settings: { title: 'Settings', subtitle: 'System configuration' },
+  profile: { title: 'Profile', subtitle: 'Manage your account settings' },
 };
 
 function InventoryApp() {
@@ -43,6 +45,8 @@ function InventoryApp() {
         return <Users />;
       case 'settings':
         return <Settings />;
+      case 'profile':
+        return <Profile />;
       default:
         return <Dashboard />;
     }
