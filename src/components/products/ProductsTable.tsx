@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { Search, Plus, Edit2, Trash2, Upload, Eye } from 'lucide-react';
 import { mockProducts, mockCategories } from '@/data/mockData';
+import { Product } from '@/types/inventory';
 import { useRole } from '@/contexts/RoleContext';
+import { toast } from 'sonner';
 import CSVImportModal from './CSVImportModal';
+import EditProductModal from './EditProductModal';
 
 interface ProductsTableProps {
   onViewProduct?: (productId: string) => void;
@@ -12,11 +15,14 @@ export default function ProductsTable({ onViewProduct }: ProductsTableProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [products, setProducts] = useState<Product[]>(mockProducts);
   const { hasPermission } = useRole();
 
   const canManageProducts = hasPermission(['admin', 'manager']);
 
-  const filteredProducts = mockProducts.filter(product => {
+  const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          product.supplier.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || product.categoryId === selectedCategory;
@@ -31,6 +37,25 @@ export default function ProductsTable({ onViewProduct }: ProductsTableProps) {
 
   const getCategoryName = (categoryId: string) => {
     return mockCategories.find(c => c.id === categoryId)?.name || 'Unknown';
+  };
+
+  const handleEdit = (e: React.MouseEvent, product: Product) => {
+    e.stopPropagation();
+    setSelectedProduct(product);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditSubmit = (updatedProduct: Product) => {
+    setProducts(products.map(p => p.id === updatedProduct.id ? updatedProduct : p));
+    toast.success('Product updated successfully!');
+  };
+
+  const handleDelete = (e: React.MouseEvent, productId: string) => {
+    e.stopPropagation();
+    if (confirm('Are you sure you want to delete this product?')) {
+      setProducts(products.filter(p => p.id !== productId));
+      toast.success('Product deleted successfully!');
+    }
   };
 
   return (
@@ -97,9 +122,7 @@ export default function ProductsTable({ onViewProduct }: ProductsTableProps) {
               <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Stock</th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Supplier</th>
-              {canManageProducts && (
-                <th className="px-6 py-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
-              )}
+              <th className="px-6 py-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -139,10 +162,16 @@ export default function ProductsTable({ onViewProduct }: ProductsTableProps) {
                       </button>
                       {canManageProducts && (
                         <>
-                          <button className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
+                          <button 
+                            onClick={(e) => handleEdit(e, product)}
+                            className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                          >
                             <Edit2 className="w-4 h-4" />
                           </button>
-                          <button className="p-2 rounded-lg hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-colors">
+                          <button 
+                            onClick={(e) => handleDelete(e, product.id)}
+                            className="p-2 rounded-lg hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-colors"
+                          >
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </>
@@ -160,7 +189,7 @@ export default function ProductsTable({ onViewProduct }: ProductsTableProps) {
       <div className="px-6 py-4 border-t border-border flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
           Showing <span className="font-medium text-foreground">1</span> to <span className="font-medium text-foreground">{filteredProducts.length}</span> of{' '}
-          <span className="font-medium text-foreground">{mockProducts.length}</span> results
+          <span className="font-medium text-foreground">{products.length}</span> results
         </p>
         <div className="flex items-center gap-2">
           <button className="px-3 py-1.5 text-sm rounded-lg bg-secondary text-muted-foreground hover:text-foreground transition-colors">
@@ -176,6 +205,16 @@ export default function ProductsTable({ onViewProduct }: ProductsTableProps) {
       </div>
 
       <CSVImportModal isOpen={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} />
+      
+      <EditProductModal
+        isOpen={isEditModalOpen}
+        product={selectedProduct}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedProduct(null);
+        }}
+        onSubmit={handleEditSubmit}
+      />
     </div>
   );
 }
