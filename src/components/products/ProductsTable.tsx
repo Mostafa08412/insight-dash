@@ -6,6 +6,7 @@ import { useRole } from '@/contexts/RoleContext';
 import { toast } from 'sonner';
 import CSVImportModal from './CSVImportModal';
 import EditProductModal from './EditProductModal';
+import AddProductModal from './AddProductModal';
 
 interface ProductsTableProps {
   onViewProduct?: (productId: string) => void;
@@ -16,6 +17,7 @@ export default function ProductsTable({ onViewProduct }: ProductsTableProps) {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [products, setProducts] = useState<Product[]>(mockProducts);
   const { hasPermission } = useRole();
@@ -50,6 +52,11 @@ export default function ProductsTable({ onViewProduct }: ProductsTableProps) {
     toast.success('Product updated successfully!');
   };
 
+  const handleAddSubmit = (newProduct: Product) => {
+    setProducts([newProduct, ...products]);
+    toast.success('Product created successfully!');
+  };
+
   const handleDelete = (e: React.MouseEvent, productId: string) => {
     e.stopPropagation();
     if (confirm('Are you sure you want to delete this product?')) {
@@ -77,7 +84,10 @@ export default function ProductsTable({ onViewProduct }: ProductsTableProps) {
                 <Upload className="w-4 h-4" />
                 Import CSV
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm">
+              <button 
+                onClick={() => setIsAddModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm"
+              >
                 <Plus className="w-4 h-4" />
                 Add Product
               </button>
@@ -214,6 +224,12 @@ export default function ProductsTable({ onViewProduct }: ProductsTableProps) {
           setSelectedProduct(null);
         }}
         onSubmit={handleEditSubmit}
+      />
+
+      <AddProductModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSubmit={handleAddSubmit}
       />
     </div>
   );

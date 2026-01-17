@@ -1,18 +1,12 @@
-import { useState } from 'react';
-import { X, ArrowUpRight, ArrowDownLeft, Package, Hash, DollarSign } from 'lucide-react';
-import { mockProducts, mockUsers } from '@/data/mockData';
+import { useState, useEffect, useCallback } from 'react';
+import { X, ArrowUpRight, ArrowDownLeft, Package, Hash, DollarSign, Search, CheckCircle2 } from 'lucide-react';
+import { mockProducts } from '@/data/mockData';
+import { Product } from '@/types/inventory';
 import { useRole } from '@/contexts/RoleContext';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 
 interface NewTransactionModalProps {
   isOpen: boolean;
@@ -22,21 +16,82 @@ interface NewTransactionModalProps {
     quantity: number;
     type: 'sale' | 'purchase';
   }) => void;
+  preselectedProduct?: Product | null;
+  preselectedType?: 'sale' | 'purchase';
 }
 
-export default function NewTransactionModal({ isOpen, onClose, onSubmit }: NewTransactionModalProps) {
+export default function NewTransactionModal({ 
+  isOpen, 
+  onClose, 
+  onSubmit,
+  preselectedProduct = null,
+  preselectedType
+}: NewTransactionModalProps) {
   const { currentUser } = useRole();
-  const [transactionType, setTransactionType] = useState<'sale' | 'purchase'>('sale');
-  const [selectedProductId, setSelectedProductId] = useState('');
+  const [transactionType, setTransactionType] = useState<'sale' | 'purchase'>(preselectedType || 'sale');
+  const [skuInput, setSkuInput] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(preselectedProduct);
+  const [isSearching, setIsSearching] = useState(false);
+  const [skuError, setSkuError] = useState('');
   const [quantity, setQuantity] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const selectedProduct = mockProducts.find(p => p.id === selectedProductId);
   const totalAmount = selectedProduct ? selectedProduct.price * (parseInt(quantity) || 0) : 0;
+
+  // Reset when modal opens with preselected product
+  useEffect(() => {
+    if (isOpen && preselectedProduct) {
+      setSelectedProduct(preselectedProduct);
+      setSkuInput('');
+      setSkuError('');
+      if (preselectedType) {
+        setTransactionType(preselectedType);
+      }
+    }
+  }, [isOpen, preselectedProduct, preselectedType]);
+
+  // SKU validation with debounce
+  const validateSKU = useCallback((sku: string) => {
+    if (!sku.trim()) {
+      setSelectedProduct(null);
+      setSkuError('');
+      return;
+    }
+
+    setIsSearching(true);
+    setSkuError('');
+
+    // Simulate API lookup delay
+    setTimeout(() => {
+      // For demo: treat product ID as SKU
+      const product = mockProducts.find(p => 
+        p.id.toLowerCase() === sku.toLowerCase() || 
+        p.name.toLowerCase().includes(sku.toLowerCase())
+      );
+
+      if (product) {
+        setSelectedProduct(product);
+        setSkuError('');
+      } else {
+        setSelectedProduct(null);
+        setSkuError('No product found with this SKU');
+      }
+      setIsSearching(false);
+    }, 300);
+  }, []);
+
+  useEffect(() => {
+    if (!preselectedProduct) {
+      const timeoutId = setTimeout(() => {
+        validateSKU(skuInput);
+      }, 300);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [skuInput, validateSKU, preselectedProduct]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedProductId || !quantity) return;
+    if (!selectedProduct || !quantity) return;
 
     setIsSubmitting(true);
     
@@ -44,24 +99,34 @@ export default function NewTransactionModal({ isOpen, onClose, onSubmit }: NewTr
     await new Promise(resolve => setTimeout(resolve, 500));
     
     onSubmit({
-      productId: selectedProductId,
+      productId: selectedProduct.id,
       quantity: parseInt(quantity),
       type: transactionType,
     });
 
     // Reset form
-    setSelectedProductId('');
-    setQuantity('');
-    setTransactionType('sale');
+    resetForm();
     setIsSubmitting(false);
     onClose();
   };
 
-  const handleClose = () => {
-    setSelectedProductId('');
+  const resetForm = () => {
+    setSelectedProduct(null);
+    setSkuInput('');
+    setSkuError('');
     setQuantity('');
     setTransactionType('sale');
+  };
+
+  const handleClose = () => {
+    resetForm();
     onClose();
+  };
+
+  const clearSelectedProduct = () => {
+    setSelectedProduct(null);
+    setSkuInput('');
+    setSkuError('');
   };
 
   if (!isOpen) return null;
@@ -125,27 +190,52 @@ export default function NewTransactionModal({ isOpen, onClose, onSubmit }: NewTr
             </div>
           </div>
 
-          {/* Product Selection */}
+          {/* Product Selection via SKU */}
           <div className="space-y-2">
-            <Label className="text-foreground font-medium">Product</Label>
-            <Select value={selectedProductId} onValueChange={setSelectedProductId}>
-              <SelectTrigger className="w-full bg-secondary border-border">
-                <SelectValue placeholder="Select a product" />
-              </SelectTrigger>
-              <SelectContent>
-                {mockProducts.map(product => (
-                  <SelectItem key={product.id} value={product.id}>
-                    <div className="flex items-center gap-2">
-                      <Package className="w-4 h-4 text-muted-foreground" />
-                      <span>{product.name}</span>
-                      <span className="text-muted-foreground text-xs">
-                        (Stock: {product.quantityInStock})
-                      </span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label className="text-foreground font-medium flex items-center gap-2">
+              <Search className="w-4 h-4" />
+              {preselectedProduct ? 'Selected Product' : 'Product SKU / Name'}
+            </Label>
+            
+            {selectedProduct ? (
+              <div className="flex items-center gap-2 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl animate-fade-in">
+                <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-foreground font-medium truncate">{selectedProduct.name}</p>
+                  <p className="text-xs text-muted-foreground">SKU: {selectedProduct.id}</p>
+                </div>
+                {!preselectedProduct && (
+                  <button
+                    type="button"
+                    onClick={clearSelectedProduct}
+                    className="p-1.5 rounded-lg hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  value={skuInput}
+                  onChange={(e) => setSkuInput(e.target.value)}
+                  placeholder="Enter product SKU or name to search..."
+                  className="pl-10 bg-secondary border-border"
+                />
+                {isSearching && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {skuError && <p className="text-sm text-destructive">{skuError}</p>}
+            {!preselectedProduct && !selectedProduct && !skuError && skuInput && !isSearching && (
+              <p className="text-xs text-muted-foreground">Try searching by product ID (e.g., "1", "2") or name</p>
+            )}
           </div>
 
           {/* Selected Product Info */}
@@ -226,7 +316,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSubmit }: NewTr
             </Button>
             <Button
               type="submit"
-              disabled={!selectedProductId || !quantity || isSubmitting || 
+              disabled={!selectedProduct || !quantity || isSubmitting || 
                 (transactionType === 'sale' && selectedProduct && parseInt(quantity) > selectedProduct.quantityInStock)}
               className={cn(
                 'flex-1',

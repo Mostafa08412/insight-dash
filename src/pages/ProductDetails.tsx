@@ -1,8 +1,11 @@
 import { useState } from 'react';
-import { ArrowLeft, Edit2, Trash2, Package, TrendingUp, TrendingDown, Calendar, Building, BarChart3, History } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, Package, TrendingUp, TrendingDown, Calendar, Building, BarChart3, History, ShoppingCart, PackagePlus } from 'lucide-react';
 import { mockProducts, mockCategories, mockTransactions } from '@/data/mockData';
+import { Product } from '@/types/inventory';
 import { useRole } from '@/contexts/RoleContext';
+import { toast } from 'sonner';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import NewTransactionModal from '@/components/transactions/NewTransactionModal';
 
 interface ProductDetailsProps {
   productId: string;
@@ -12,6 +15,8 @@ interface ProductDetailsProps {
 export default function ProductDetails({ productId, onBack }: ProductDetailsProps) {
   const { hasPermission } = useRole();
   const canManageProducts = hasPermission(['admin', 'manager']);
+  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+  const [transactionType, setTransactionType] = useState<'sale' | 'purchase'>('sale');
   
   const product = mockProducts.find(p => p.id === productId);
   const category = mockCategories.find(c => c.id === product?.categoryId);
@@ -64,18 +69,42 @@ export default function ProductDetails({ productId, onBack }: ProductDetailsProp
           </div>
         </div>
         
-        {canManageProducts && (
-          <div className="flex items-center gap-2">
-            <button className="flex items-center gap-2 px-4 py-2 bg-secondary border border-border text-foreground rounded-lg hover:bg-secondary/80 transition-colors font-medium text-sm">
-              <Edit2 className="w-4 h-4" />
-              Edit
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90 transition-colors font-medium text-sm">
-              <Trash2 className="w-4 h-4" />
-              Delete
-            </button>
-          </div>
-        )}
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Quick Transaction Buttons */}
+          <button 
+            onClick={() => {
+              setTransactionType('sale');
+              setIsTransactionModalOpen(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium text-sm"
+          >
+            <ShoppingCart className="w-4 h-4" />
+            Record Sale
+          </button>
+          <button 
+            onClick={() => {
+              setTransactionType('purchase');
+              setIsTransactionModalOpen(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+          >
+            <PackagePlus className="w-4 h-4" />
+            Record Purchase
+          </button>
+          
+          {canManageProducts && (
+            <>
+              <button className="flex items-center gap-2 px-4 py-2 bg-secondary border border-border text-foreground rounded-lg hover:bg-secondary/80 transition-colors font-medium text-sm">
+                <Edit2 className="w-4 h-4" />
+                Edit
+              </button>
+              <button className="flex items-center gap-2 px-4 py-2 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90 transition-colors font-medium text-sm">
+                <Trash2 className="w-4 h-4" />
+                Delete
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Main content */}
@@ -248,6 +277,18 @@ export default function ProductDetails({ productId, onBack }: ProductDetailsProp
           </div>
         </div>
       </div>
+
+      {/* Transaction Modal */}
+      <NewTransactionModal
+        isOpen={isTransactionModalOpen}
+        onClose={() => setIsTransactionModalOpen(false)}
+        onSubmit={(transaction) => {
+          toast.success(`${transaction.type === 'sale' ? 'Sale' : 'Purchase'} recorded successfully!`);
+          setIsTransactionModalOpen(false);
+        }}
+        preselectedProduct={product}
+        preselectedType={transactionType}
+      />
     </div>
   );
 }
