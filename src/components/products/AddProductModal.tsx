@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Package, DollarSign, Hash, Building2, AlertTriangle, FileText } from 'lucide-react';
+import { X, Package, DollarSign, Hash, Building2, AlertTriangle, FileText, Barcode } from 'lucide-react';
 import { mockCategories } from '@/data/mockData';
 import { Product } from '@/types/inventory';
 import { Button } from '@/components/ui/button';
@@ -22,6 +22,7 @@ interface AddProductModalProps {
 
 export default function AddProductModal({ isOpen, onClose, onSubmit }: AddProductModalProps) {
   const [formData, setFormData] = useState({
+    sku: '',
     name: '',
     description: '',
     price: '',
@@ -36,6 +37,7 @@ export default function AddProductModal({ isOpen, onClose, onSubmit }: AddProduc
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
+    if (!formData.sku.trim()) newErrors.sku = 'SKU is required';
     if (!formData.name.trim()) newErrors.name = 'Product name is required';
     if (!formData.price || parseFloat(formData.price) <= 0) newErrors.price = 'Valid price is required';
     if (!formData.quantityInStock || parseInt(formData.quantityInStock) < 0) newErrors.quantityInStock = 'Valid quantity is required';
@@ -58,6 +60,7 @@ export default function AddProductModal({ isOpen, onClose, onSubmit }: AddProduc
     
     const newProduct: Product = {
       id: `prod_${Date.now()}`,
+      sku: formData.sku.trim().toUpperCase(),
       name: formData.name.trim(),
       description: formData.description.trim(),
       price: parseFloat(formData.price),
@@ -76,6 +79,7 @@ export default function AddProductModal({ isOpen, onClose, onSubmit }: AddProduc
 
   const handleClose = () => {
     setFormData({
+      sku: '',
       name: '',
       description: '',
       price: '',
@@ -118,6 +122,21 @@ export default function AddProductModal({ isOpen, onClose, onSubmit }: AddProduc
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* SKU */}
+          <div className="space-y-2">
+            <Label className="text-foreground font-medium flex items-center gap-2">
+              <Barcode className="w-4 h-4" />
+              SKU (Stock Keeping Unit)
+            </Label>
+            <Input
+              value={formData.sku}
+              onChange={(e) => setFormData({ ...formData, sku: e.target.value.toUpperCase() })}
+              placeholder="e.g., PROD-001"
+              className="bg-secondary border-border font-mono"
+            />
+            {errors.sku && <p className="text-sm text-destructive">{errors.sku}</p>}
+          </div>
+
           {/* Product Name */}
           <div className="space-y-2">
             <Label className="text-foreground font-medium flex items-center gap-2">
