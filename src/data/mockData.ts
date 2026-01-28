@@ -15,16 +15,16 @@ export const mockCategories: Category[] = [
 ];
 
 export const mockProducts: Product[] = [
-  { id: '1', name: 'MacBook Pro 16"', description: 'Apple M3 Pro, 18GB RAM', price: 2499, quantityInStock: 15, categoryId: '1', supplier: 'Apple Inc.', createdAt: new Date('2024-01-15'), updatedAt: new Date('2024-01-20'), lowStockThreshold: 5 },
-  { id: '2', name: 'Dell UltraSharp 27"', description: '4K USB-C Hub Monitor', price: 699, quantityInStock: 3, categoryId: '1', supplier: 'Dell Technologies', createdAt: new Date('2024-01-10'), updatedAt: new Date('2024-01-18'), lowStockThreshold: 10 },
-  { id: '3', name: 'Herman Miller Aeron', description: 'Ergonomic Office Chair', price: 1395, quantityInStock: 8, categoryId: '3', supplier: 'Herman Miller', createdAt: new Date('2024-01-05'), updatedAt: new Date('2024-01-12'), lowStockThreshold: 5 },
-  { id: '4', name: 'Logitech MX Master 3S', description: 'Wireless Performance Mouse', price: 99, quantityInStock: 42, categoryId: '1', supplier: 'Logitech', createdAt: new Date('2024-01-08'), updatedAt: new Date('2024-01-15'), lowStockThreshold: 20 },
-  { id: '5', name: 'Mechanical Keyboard Pro', description: 'Cherry MX Brown Switches', price: 179, quantityInStock: 2, categoryId: '1', supplier: 'Keychron', createdAt: new Date('2024-01-12'), updatedAt: new Date('2024-01-19'), lowStockThreshold: 10 },
-  { id: '6', name: 'Standing Desk Frame', description: 'Electric Height Adjustable', price: 549, quantityInStock: 18, categoryId: '3', supplier: 'Uplift Desk', createdAt: new Date('2024-01-03'), updatedAt: new Date('2024-01-10'), lowStockThreshold: 8 },
-  { id: '7', name: 'USB-C Hub 10-in-1', description: 'Multiport Adapter', price: 79, quantityInStock: 56, categoryId: '5', supplier: 'Anker', createdAt: new Date('2024-01-14'), updatedAt: new Date('2024-01-21'), lowStockThreshold: 25 },
-  { id: '8', name: 'Notebook Pack (100)', description: 'A5 Lined Notebooks', price: 45, quantityInStock: 234, categoryId: '2', supplier: 'Moleskine', createdAt: new Date('2024-01-06'), updatedAt: new Date('2024-01-13'), lowStockThreshold: 50 },
-  { id: '9', name: 'Webcam 4K Pro', description: 'Ultra HD Streaming Camera', price: 199, quantityInStock: 4, categoryId: '1', supplier: 'Logitech', createdAt: new Date('2024-01-11'), updatedAt: new Date('2024-01-18'), lowStockThreshold: 10 },
-  { id: '10', name: 'Office 365 License', description: 'Annual Business Subscription', price: 299, quantityInStock: 150, categoryId: '4', supplier: 'Microsoft', createdAt: new Date('2024-01-01'), updatedAt: new Date('2024-01-08'), lowStockThreshold: 20 },
+  { id: '1', sku: 'MBP-16-M3P', name: 'MacBook Pro 16"', description: 'Apple M3 Pro, 18GB RAM', price: 2499, quantityInStock: 15, categoryId: '1', supplier: 'Apple Inc.', createdAt: new Date('2024-01-15'), updatedAt: new Date('2024-01-20'), lowStockThreshold: 5 },
+  { id: '2', sku: 'DELL-US27-4K', name: 'Dell UltraSharp 27"', description: '4K USB-C Hub Monitor', price: 699, quantityInStock: 3, categoryId: '1', supplier: 'Dell Technologies', createdAt: new Date('2024-01-10'), updatedAt: new Date('2024-01-18'), lowStockThreshold: 10 },
+  { id: '3', sku: 'HM-AERON-BLK', name: 'Herman Miller Aeron', description: 'Ergonomic Office Chair', price: 1395, quantityInStock: 8, categoryId: '3', supplier: 'Herman Miller', createdAt: new Date('2024-01-05'), updatedAt: new Date('2024-01-12'), lowStockThreshold: 5 },
+  { id: '4', sku: 'LOG-MX3S-BLK', name: 'Logitech MX Master 3S', description: 'Wireless Performance Mouse', price: 99, quantityInStock: 42, categoryId: '1', supplier: 'Logitech', createdAt: new Date('2024-01-08'), updatedAt: new Date('2024-01-15'), lowStockThreshold: 20 },
+  { id: '5', sku: 'KEY-MECH-PRO', name: 'Mechanical Keyboard Pro', description: 'Cherry MX Brown Switches', price: 179, quantityInStock: 2, categoryId: '1', supplier: 'Keychron', createdAt: new Date('2024-01-12'), updatedAt: new Date('2024-01-19'), lowStockThreshold: 10 },
+  { id: '6', sku: 'UPL-DSK-FRM', name: 'Standing Desk Frame', description: 'Electric Height Adjustable', price: 549, quantityInStock: 18, categoryId: '3', supplier: 'Uplift Desk', createdAt: new Date('2024-01-03'), updatedAt: new Date('2024-01-10'), lowStockThreshold: 8 },
+  { id: '7', sku: 'ANK-HUB-10P', name: 'USB-C Hub 10-in-1', description: 'Multiport Adapter', price: 79, quantityInStock: 56, categoryId: '5', supplier: 'Anker', createdAt: new Date('2024-01-14'), updatedAt: new Date('2024-01-21'), lowStockThreshold: 25 },
+  { id: '8', sku: 'MOL-NB-100P', name: 'Notebook Pack (100)', description: 'A5 Lined Notebooks', price: 45, quantityInStock: 234, categoryId: '2', supplier: 'Moleskine', createdAt: new Date('2024-01-06'), updatedAt: new Date('2024-01-13'), lowStockThreshold: 50 },
+  { id: '9', sku: 'LOG-WBC-4KP', name: 'Webcam 4K Pro', description: 'Ultra HD Streaming Camera', price: 199, quantityInStock: 4, categoryId: '1', supplier: 'Logitech', createdAt: new Date('2024-01-11'), updatedAt: new Date('2024-01-18'), lowStockThreshold: 10 },
+  { id: '10', sku: 'MS-O365-BUS', name: 'Office 365 License', description: 'Annual Business Subscription', price: 299, quantityInStock: 150, categoryId: '4', supplier: 'Microsoft', createdAt: new Date('2024-01-01'), updatedAt: new Date('2024-01-08'), lowStockThreshold: 20 },
 ];
 
 export const mockTransactions: Transaction[] = [

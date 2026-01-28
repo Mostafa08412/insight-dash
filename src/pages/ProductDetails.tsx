@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, Edit2, Trash2, Package, TrendingUp, TrendingDown, Calendar, Building, BarChart3, History, ShoppingCart, PackagePlus } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, Package, TrendingUp, TrendingDown, Calendar, Building, BarChart3, History, ShoppingCart, PackagePlus, Barcode } from 'lucide-react';
 import { mockProducts, mockCategories, mockTransactions } from '@/data/mockData';
 import { Product } from '@/types/inventory';
 import { useRole } from '@/contexts/RoleContext';
@@ -64,7 +64,10 @@ export default function ProductDetails({ productId, onBack }: ProductDetailsProp
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">{product.name}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold text-foreground">{product.name}</h1>
+              <span className="px-2 py-0.5 bg-secondary text-muted-foreground text-xs font-mono rounded">{product.sku}</span>
+            </div>
             <p className="text-muted-foreground">{category?.name}</p>
           </div>
         </div>
@@ -122,6 +125,10 @@ export default function ProductDetails({ productId, onBack }: ProductDetailsProp
               {/* Product Details */}
               <div className="flex-1 space-y-4">
                 <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Barcode className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-mono text-muted-foreground">{product.sku}</span>
+                  </div>
                   <h2 className="text-xl font-semibold text-foreground">{product.name}</h2>
                   <p className="text-muted-foreground mt-1">{product.description}</p>
                 </div>
