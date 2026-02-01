@@ -6,7 +6,7 @@ import { useRole } from '@/contexts/RoleContext';
 import { toast } from 'sonner';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import NewTransactionModal from '@/components/transactions/NewTransactionModal';
-
+import EditProductModal from '@/components/products/EditProductModal';
 interface ProductDetailsProps {
   productId: string;
   onBack: () => void;
@@ -17,6 +17,7 @@ export default function ProductDetails({ productId, onBack }: ProductDetailsProp
   const canManageProducts = hasPermission(['admin', 'manager']);
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [transactionType, setTransactionType] = useState<'sale' | 'purchase'>('sale');
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
   const product = mockProducts.find(p => p.id === productId);
   const category = mockCategories.find(c => c.id === product?.categoryId);
@@ -97,7 +98,10 @@ export default function ProductDetails({ productId, onBack }: ProductDetailsProp
           
           {canManageProducts && (
             <>
-              <button className="flex items-center gap-2 px-4 py-2 bg-secondary border border-border text-foreground rounded-lg hover:bg-secondary/80 transition-colors font-medium text-sm">
+              <button 
+                onClick={() => setIsEditModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-secondary border border-border text-foreground rounded-lg hover:bg-secondary/80 transition-colors font-medium text-sm"
+              >
                 <Edit2 className="w-4 h-4" />
                 Edit
               </button>
@@ -295,6 +299,18 @@ export default function ProductDetails({ productId, onBack }: ProductDetailsProp
         }}
         preselectedProduct={product}
         preselectedType={transactionType}
+      />
+
+      {/* Edit Product Modal */}
+      <EditProductModal
+        isOpen={isEditModalOpen}
+        product={product}
+        onClose={() => setIsEditModalOpen(false)}
+        onSubmit={(updatedProduct) => {
+          // In a real app, this would update the backend
+          toast.success('Product updated successfully!');
+          setIsEditModalOpen(false);
+        }}
       />
     </div>
   );
