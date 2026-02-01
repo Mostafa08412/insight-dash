@@ -23,7 +23,6 @@ interface EditProductModalProps {
 
 export default function EditProductModal({ isOpen, product, onClose, onSubmit }: EditProductModalProps) {
   const [formData, setFormData] = useState({
-    sku: '',
     name: '',
     description: '',
     price: '',
@@ -38,7 +37,6 @@ export default function EditProductModal({ isOpen, product, onClose, onSubmit }:
   useEffect(() => {
     if (product) {
       setFormData({
-        sku: product.sku,
         name: product.name,
         description: product.description,
         price: product.price.toString(),
@@ -53,7 +51,6 @@ export default function EditProductModal({ isOpen, product, onClose, onSubmit }:
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
-    if (!formData.sku.trim()) newErrors.sku = 'SKU is required';
     if (!formData.name.trim()) newErrors.name = 'Product name is required';
     if (!formData.price || parseFloat(formData.price) <= 0) newErrors.price = 'Valid price is required';
     if (!formData.quantityInStock || parseInt(formData.quantityInStock) < 0) newErrors.quantityInStock = 'Valid quantity is required';
@@ -76,7 +73,7 @@ export default function EditProductModal({ isOpen, product, onClose, onSubmit }:
     
     const updatedProduct: Product = {
       ...product,
-      sku: formData.sku.trim().toUpperCase(),
+      sku: product.sku, // SKU is immutable
       name: formData.name.trim(),
       description: formData.description.trim(),
       price: parseFloat(formData.price),
@@ -127,19 +124,18 @@ export default function EditProductModal({ isOpen, product, onClose, onSubmit }:
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* SKU */}
+          {/* SKU (Read-only) */}
           <div className="space-y-2">
             <Label className="text-foreground font-medium flex items-center gap-2">
               <Barcode className="w-4 h-4" />
               SKU (Stock Keeping Unit)
             </Label>
             <Input
-              value={formData.sku}
-              onChange={(e) => setFormData({ ...formData, sku: e.target.value.toUpperCase() })}
-              placeholder="e.g., PROD-001"
-              className="bg-secondary border-border font-mono"
+              value={product?.sku || ''}
+              disabled
+              className="bg-muted border-border font-mono cursor-not-allowed opacity-70"
             />
-            {errors.sku && <p className="text-sm text-destructive">{errors.sku}</p>}
+            <p className="text-xs text-muted-foreground">SKU cannot be modified after creation</p>
           </div>
 
           {/* Product Name */}
