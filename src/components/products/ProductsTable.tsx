@@ -322,8 +322,8 @@ export default function ProductsTable({ onViewProduct }: ProductsTableProps) {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
+      {/* Table - Desktop */}
+      <div className="hidden lg:block overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border">
@@ -398,6 +398,58 @@ export default function ProductsTable({ onViewProduct }: ProductsTableProps) {
             })}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile/Tablet Cards */}
+      <div className="lg:hidden divide-y divide-border">
+        {paginatedProducts.map((product) => {
+          const stockStatus = getStockStatus(product.quantityInStock, product.lowStockThreshold);
+          
+          return (
+            <div 
+              key={product.id} 
+              className="p-4 hover:bg-secondary/50 transition-colors cursor-pointer"
+              onClick={() => onViewProduct?.(product.id)}
+            >
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-foreground truncate">{product.name}</p>
+                  <p className="text-xs font-mono text-muted-foreground">{product.sku}</p>
+                </div>
+                <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                  <button 
+                    onClick={() => onViewProduct?.(product.id)}
+                    className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </button>
+                  {canManageProducts && (
+                    <>
+                      <button 
+                        onClick={(e) => handleEdit(e, product)}
+                        className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={(e) => handleDelete(e, product.id)}
+                        className="p-1.5 rounded-lg hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+                <span className="text-foreground font-semibold">${product.price.toLocaleString()}</span>
+                <span className="text-muted-foreground">{getCategoryName(product.categoryId)}</span>
+                <span className="text-muted-foreground">Stock: {product.quantityInStock}</span>
+                <span className={stockStatus.class}>{stockStatus.label}</span>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {paginatedProducts.length === 0 && (

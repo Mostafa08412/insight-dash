@@ -247,7 +247,7 @@ export default function Alerts() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -402,46 +402,46 @@ export default function Alerts() {
               const isCritical = stockPercentage < 30;
 
               return (
-                <div key={alert.id} className="p-6 table-row-hover">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-4">
+                <div key={alert.id} className="p-4 sm:p-6 table-row-hover">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                    <div className="flex items-start gap-3 sm:gap-4">
                       <div className={cn(
-                        'w-12 h-12 rounded-xl flex items-center justify-center',
+                        'w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0',
                         isCritical ? 'bg-destructive/20' : 'bg-warning/20'
                       )}>
                         <AlertTriangle className={cn(
-                          'w-6 h-6',
+                          'w-5 h-5 sm:w-6 sm:h-6',
                           isCritical ? 'text-destructive' : 'text-warning'
                         )} />
                       </div>
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="text-base font-semibold text-foreground">{alert.productName}</h4>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                          <h4 className="text-sm sm:text-base font-semibold text-foreground">{alert.productName}</h4>
                           <span className={isCritical ? 'badge-danger' : 'badge-warning'}>
                             {isCritical ? 'Critical' : 'Low Stock'}
                           </span>
                         </div>
-                        <p className="text-sm text-muted-foreground mb-3">
+                        <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3">
                           Current stock ({alert.currentStock}) is below the threshold ({alert.threshold})
                         </p>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <span>Alert triggered: {format(alert.date, 'MMM d, yyyy')}</span>
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-muted-foreground">
+                          <span>Alert: {format(alert.date, 'MMM d, yyyy')}</span>
                           <span className={cn(
                             'flex items-center gap-1',
                             alert.alertSent ? 'text-success' : 'text-warning'
                           )}>
                             {alert.alertSent ? <CheckCircle className="w-3 h-3" /> : <Bell className="w-3 h-3" />}
-                            {alert.alertSent ? 'Notification sent' : 'Pending notification'}
+                            {alert.alertSent ? 'Sent' : 'Pending'}
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <button className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium">
+                    <div className="flex items-center gap-2 ml-13 sm:ml-0 flex-shrink-0">
+                      <button className="px-3 py-1.5 sm:px-4 sm:py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-xs sm:text-sm font-medium">
                         Order Stock
                       </button>
-                      <button className="px-4 py-2 bg-secondary text-foreground rounded-lg hover:bg-accent transition-colors text-sm font-medium">
+                      <button className="px-3 py-1.5 sm:px-4 sm:py-2 bg-secondary text-foreground rounded-lg hover:bg-accent transition-colors text-xs sm:text-sm font-medium">
                         Dismiss
                       </button>
                     </div>

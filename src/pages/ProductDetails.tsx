@@ -56,58 +56,58 @@ export default function ProductDetails({ productId, onBack }: ProductDetailsProp
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
           <button
             onClick={onBack}
-            className="p-2 rounded-lg bg-secondary hover:bg-secondary/80 text-foreground transition-colors"
+            className="p-2 rounded-lg bg-secondary hover:bg-secondary/80 text-foreground transition-colors flex-shrink-0"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-foreground">{product.name}</h1>
-              <span className="px-2 py-0.5 bg-secondary text-muted-foreground text-xs font-mono rounded">{product.sku}</span>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground truncate">{product.name}</h1>
+              <span className="px-2 py-0.5 bg-secondary text-muted-foreground text-xs font-mono rounded flex-shrink-0">{product.sku}</span>
             </div>
-            <p className="text-muted-foreground">{category?.name}</p>
+            <p className="text-sm text-muted-foreground">{category?.name}</p>
           </div>
         </div>
         
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap ml-11 sm:ml-0">
           {/* Quick Transaction Buttons */}
           <button 
             onClick={() => {
               setTransactionType('sale');
               setIsTransactionModalOpen(true);
             }}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium text-sm"
+            className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium text-xs sm:text-sm"
           >
             <ShoppingCart className="w-4 h-4" />
-            Record Sale
+            <span className="hidden sm:inline">Record</span> Sale
           </button>
           <button 
             onClick={() => {
               setTransactionType('purchase');
               setIsTransactionModalOpen(true);
             }}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+            className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-xs sm:text-sm"
           >
             <PackagePlus className="w-4 h-4" />
-            Record Purchase
+            <span className="hidden sm:inline">Record</span> Purchase
           </button>
           
           {canManageProducts && (
             <>
               <button 
                 onClick={() => setIsEditModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-secondary border border-border text-foreground rounded-lg hover:bg-secondary/80 transition-colors font-medium text-sm"
+                className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-secondary border border-border text-foreground rounded-lg hover:bg-secondary/80 transition-colors font-medium text-xs sm:text-sm"
               >
                 <Edit2 className="w-4 h-4" />
-                Edit
+                <span className="hidden sm:inline">Edit</span>
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90 transition-colors font-medium text-sm">
+              <button className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90 transition-colors font-medium text-xs sm:text-sm">
                 <Trash2 className="w-4 h-4" />
-                Delete
+                <span className="hidden sm:inline">Delete</span>
               </button>
             </>
           )}
