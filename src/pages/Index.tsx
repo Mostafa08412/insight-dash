@@ -58,9 +58,14 @@ function InventoryApp() {
     <div className="min-h-screen bg-background">
       <Sidebar activePage={activePage} onNavigate={setActivePage} />
       
-      <main className="ml-64">
-        <Header title={pageInfo.title} subtitle={pageInfo.subtitle} />
-        <div className="p-8">
+      <main className="lg:ml-64">
+        <Header 
+          title={pageInfo.title} 
+          subtitle={pageInfo.subtitle}
+          activePage={activePage}
+          onNavigate={setActivePage}
+        />
+        <div className="p-4 sm:p-6 lg:p-8">
           {renderPage()}
         </div>
       </main>

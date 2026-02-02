@@ -1,14 +1,17 @@
-import { Search, Bell, Moon, Sun } from 'lucide-react';
+import { Search, Bell } from 'lucide-react';
 import { useRole } from '@/contexts/RoleContext';
 import { useState } from 'react';
 import { mockAlerts } from '@/data/mockData';
+import MobileSidebar from './MobileSidebar';
 
 interface HeaderProps {
   title: string;
   subtitle?: string;
+  activePage: string;
+  onNavigate: (page: string) => void;
 }
 
-export default function Header({ title, subtitle }: HeaderProps) {
+export default function Header({ title, subtitle, activePage, onNavigate }: HeaderProps) {
   const { currentUser, currentRole } = useRole();
   const [searchValue, setSearchValue] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
@@ -17,26 +20,34 @@ export default function Header({ title, subtitle }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border">
-      <div className="flex items-center justify-between px-8 py-4">
-        {/* Title Section */}
-        <div className="animate-fade-in">
-          <h1 className="text-2xl font-bold text-foreground">{title}</h1>
-          {subtitle && <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>}
+      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 gap-4">
+        {/* Mobile Menu + Title Section */}
+        <div className="flex items-center gap-3 min-w-0">
+          <MobileSidebar activePage={activePage} onNavigate={onNavigate} />
+          <div className="animate-fade-in min-w-0">
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground truncate">{title}</h1>
+            {subtitle && <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 hidden sm:block">{subtitle}</p>}
+          </div>
         </div>
 
         {/* Actions Section */}
-        <div className="flex items-center gap-4">
-          {/* Search Bar */}
-          <div className="relative">
+        <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+          {/* Search Bar - Hidden on mobile, visible from sm */}
+          <div className="relative hidden md:block">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search products, transactions..."
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
-              className="w-72 pl-10 pr-4 py-2 bg-secondary border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+              className="w-48 lg:w-72 pl-10 pr-4 py-2 bg-secondary border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
             />
           </div>
+
+          {/* Mobile Search Button */}
+          <button className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors md:hidden">
+            <Search className="w-5 h-5" />
+          </button>
 
           {/* Notifications */}
           <div className="relative">
@@ -53,7 +64,7 @@ export default function Header({ title, subtitle }: HeaderProps) {
             </button>
 
             {showNotifications && (
-              <div className="absolute right-0 top-full mt-2 w-80 bg-card rounded-xl border border-border shadow-lg overflow-hidden animate-scale-in">
+              <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-card rounded-xl border border-border shadow-lg overflow-hidden animate-scale-in">
                 <div className="px-4 py-3 border-b border-border">
                   <h3 className="font-semibold text-foreground">Notifications</h3>
                 </div>
@@ -64,8 +75,8 @@ export default function Header({ title, subtitle }: HeaderProps) {
                         <div className="w-8 h-8 rounded-lg bg-warning/20 flex items-center justify-center flex-shrink-0">
                           <span className="text-warning text-sm">⚠️</span>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-foreground">{alert.productName}</p>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">{alert.productName}</p>
                           <p className="text-xs text-muted-foreground">
                             Stock: {alert.currentStock} / Threshold: {alert.threshold}
                           </p>
@@ -81,13 +92,13 @@ export default function Header({ title, subtitle }: HeaderProps) {
             )}
           </div>
 
-          {/* User Avatar */}
-          <div className="flex items-center gap-3 pl-4 border-l border-border">
-            <div className="text-right">
+          {/* User Avatar - Simplified on mobile */}
+          <div className="flex items-center gap-2 sm:gap-3 pl-2 sm:pl-4 border-l border-border">
+            <div className="text-right hidden sm:block">
               <p className="text-sm font-medium text-foreground">{currentUser.name}</p>
               <p className="text-xs text-muted-foreground capitalize">{currentRole}</p>
             </div>
-            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold text-sm">
               {currentUser.avatar}
             </div>
           </div>

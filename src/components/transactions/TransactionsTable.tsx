@@ -230,7 +230,7 @@ export default function TransactionsTable() {
               </div>
 
               <Select value={userFilter} onValueChange={setUserFilter}>
-                <SelectTrigger className="w-[160px] bg-secondary border-border">
+                <SelectTrigger className="w-full sm:w-[160px] bg-secondary border-border">
                   <SelectValue placeholder="User" />
                 </SelectTrigger>
                 <SelectContent>
@@ -327,8 +327,8 @@ export default function TransactionsTable() {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
+        {/* Table - Desktop */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border">
@@ -389,6 +389,50 @@ export default function TransactionsTable() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Cards */}
+        <div className="md:hidden divide-y divide-border">
+          {paginatedTransactions.map((transaction) => (
+            <div key={transaction.id} className="p-4 hover:bg-secondary/50 transition-colors">
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className={cn(
+                    'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium flex-shrink-0',
+                    transaction.type === 'sale' 
+                      ? 'bg-emerald-500/20 text-emerald-500'
+                      : 'bg-blue-500/20 text-blue-500'
+                  )}>
+                    {transaction.type === 'sale' ? (
+                      <ArrowUpRight className="w-3 h-3" />
+                    ) : (
+                      <ArrowDownLeft className="w-3 h-3" />
+                    )}
+                    {transaction.type === 'sale' ? 'Sale' : 'Purchase'}
+                  </div>
+                  <span className="text-sm font-medium text-foreground truncate">{transaction.productName}</span>
+                </div>
+                <span className={cn(
+                  'text-sm font-semibold flex-shrink-0',
+                  transaction.type === 'sale' ? 'text-emerald-500' : 'text-blue-500'
+                )}>
+                  {transaction.type === 'sale' ? '+' : '-'}${transaction.totalAmount.toLocaleString()}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-primary text-[10px] font-medium">
+                    {transaction.userName.split(' ').map(n => n[0]).join('')}
+                  </div>
+                  <span>{transaction.userName}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span>{transaction.quantity} units</span>
+                  <span>{format(new Date(transaction.date), 'MMM d')}</span>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
 
         {paginatedTransactions.length === 0 && (
