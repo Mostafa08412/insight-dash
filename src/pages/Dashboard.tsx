@@ -8,7 +8,11 @@ import TopProducts from '@/components/dashboard/TopProducts';
 import { mockDashboardStats } from '@/data/mockData';
 import { useRole } from '@/contexts/RoleContext';
 
-export default function Dashboard() {
+interface DashboardProps {
+  onNavigate?: (page: string) => void;
+}
+
+export default function Dashboard({ onNavigate }: DashboardProps) {
   const { currentRole, hasPermission } = useRole();
   const stats = mockDashboardStats;
 
@@ -45,7 +49,6 @@ export default function Dashboard() {
           value={stats.lowStockCount}
           icon={AlertTriangle}
           variant="warning"
-          change={{ value: 2, positive: false }}
           delay={150}
         />
       </div>
@@ -61,11 +64,11 @@ export default function Dashboard() {
       {/* Bottom Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <RecentTransactions />
+          <RecentTransactions onNavigate={onNavigate} />
         </div>
         <div className="space-y-6">
-          {hasPermission(['admin', 'manager']) && <TopProducts />}
-          <LowStockPanel />
+          {hasPermission(['admin', 'manager']) && <TopProducts onNavigate={onNavigate} />}
+          <LowStockPanel onNavigate={onNavigate} />
         </div>
       </div>
     </div>

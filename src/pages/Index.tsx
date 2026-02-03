@@ -30,7 +30,7 @@ function InventoryApp() {
   const renderPage = () => {
     switch (activePage) {
       case 'dashboard':
-        return <Dashboard />;
+        return <Dashboard onNavigate={setActivePage} />;
       case 'products':
         return <Products />;
       case 'transactions':
@@ -48,7 +48,7 @@ function InventoryApp() {
       case 'profile':
         return <Profile />;
       default:
-        return <Dashboard />;
+        return <Dashboard onNavigate={setActivePage} />;
     }
   };
 

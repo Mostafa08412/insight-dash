@@ -1,9 +1,13 @@
-import { ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, ExternalLink } from 'lucide-react';
 import { mockTransactions } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
-export default function RecentTransactions() {
+interface RecentTransactionsProps {
+  onNavigate?: (page: string) => void;
+}
+
+export default function RecentTransactions({ onNavigate }: RecentTransactionsProps) {
   const recentTransactions = mockTransactions.slice(0, 5);
 
   return (
@@ -14,7 +18,13 @@ export default function RecentTransactions() {
             <h3 className="text-lg font-semibold text-foreground">Recent Transactions</h3>
             <p className="text-sm text-muted-foreground">Latest inventory movements</p>
           </div>
-          <button className="text-sm text-primary hover:underline">View all</button>
+          <button 
+            onClick={() => onNavigate?.('transactions')}
+            className="flex items-center gap-1 text-sm text-primary hover:underline"
+          >
+            View all
+            <ExternalLink className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
 

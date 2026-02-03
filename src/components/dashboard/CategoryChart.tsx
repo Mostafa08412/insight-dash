@@ -27,11 +27,13 @@ export default function CategoryChart() {
             </Pie>
             <Tooltip
               contentStyle={{
-                backgroundColor: 'hsl(222 47% 13%)',
-                border: '1px solid hsl(217 33% 22%)',
+                backgroundColor: 'hsl(var(--card))',
+                border: '1px solid hsl(var(--border))',
                 borderRadius: '8px',
+                color: 'hsl(var(--foreground))',
               }}
-              labelStyle={{ color: 'hsl(210 40% 98%)' }}
+              labelStyle={{ color: 'hsl(var(--foreground))' }}
+              itemStyle={{ color: 'hsl(var(--foreground))' }}
             />
           </PieChart>
         </ResponsiveContainer>
