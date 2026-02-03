@@ -1,7 +1,11 @@
 import { AlertTriangle, ExternalLink } from 'lucide-react';
 import { mockAlerts } from '@/data/mockData';
 
-export default function LowStockPanel() {
+interface LowStockPanelProps {
+  onNavigate?: (page: string) => void;
+}
+
+export default function LowStockPanel({ onNavigate }: LowStockPanelProps) {
   return (
     <div className="bg-card border border-border rounded-xl animate-fade-in" style={{ animationDelay: '500ms' }}>
       <div className="p-6 border-b border-border">
@@ -50,7 +54,10 @@ export default function LowStockPanel() {
       </div>
 
       <div className="p-4 border-t border-border">
-        <button className="w-full flex items-center justify-center gap-2 py-2 text-sm text-primary hover:underline">
+        <button 
+          onClick={() => onNavigate?.('alerts')}
+          className="w-full flex items-center justify-center gap-2 py-2 text-sm text-primary hover:underline"
+        >
           <span>Manage all alerts</span>
           <ExternalLink className="w-4 h-4" />
         </button>

@@ -1,20 +1,33 @@
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, ExternalLink } from 'lucide-react';
 import { topProductsData } from '@/data/mockData';
 
-export default function TopProducts() {
+interface TopProductsProps {
+  onNavigate?: (page: string) => void;
+}
+
+export default function TopProducts({ onNavigate }: TopProductsProps) {
   const maxSales = Math.max(...topProductsData.map(p => p.sales));
 
   return (
     <div className="bg-card border border-border rounded-xl animate-fade-in" style={{ animationDelay: '350ms' }}>
       <div className="p-6 border-b border-border">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-            <TrendingUp className="w-5 h-5 text-primary" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Top Products</h3>
+              <p className="text-sm text-muted-foreground">Best selling items this month</p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-lg font-semibold text-foreground">Top Products</h3>
-            <p className="text-sm text-muted-foreground">Best selling items this month</p>
-          </div>
+          <button 
+            onClick={() => onNavigate?.('products')}
+            className="flex items-center gap-1 text-sm text-primary hover:underline"
+          >
+            View all
+            <ExternalLink className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
 

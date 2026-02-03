@@ -3,6 +3,7 @@ import { useRole } from '@/contexts/RoleContext';
 import { useState } from 'react';
 import { mockAlerts } from '@/data/mockData';
 import MobileSidebar from './MobileSidebar';
+import ThemeToggle from './ThemeToggle';
 
 interface HeaderProps {
   title: string;
@@ -48,6 +49,9 @@ export default function Header({ title, subtitle, activePage, onNavigate }: Head
           <button className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors md:hidden">
             <Search className="w-5 h-5" />
           </button>
+
+          {/* Theme Toggle */}
+          <ThemeToggle />
 
           {/* Notifications */}
           <div className="relative">
