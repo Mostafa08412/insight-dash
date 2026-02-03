@@ -18,7 +18,11 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 
-export default function TransactionsTable() {
+interface TransactionsTableProps {
+  onViewDetails?: (transactionId: string) => void;
+}
+
+export default function TransactionsTable({ onViewDetails }: TransactionsTableProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'sale' | 'purchase'>('all');
   const [userFilter, setUserFilter] = useState('all');
@@ -342,7 +346,11 @@ export default function TransactionsTable() {
             </thead>
             <tbody className="divide-y divide-border">
               {paginatedTransactions.map((transaction) => (
-                <tr key={transaction.id} className="hover:bg-secondary/50 transition-colors">
+                <tr 
+                  key={transaction.id} 
+                  onClick={() => onViewDetails?.(transaction.id)}
+                  className="hover:bg-secondary/50 transition-colors cursor-pointer"
+                >
                   <td className="px-6 py-4">
                     <div className={cn(
                       'inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium',
@@ -394,7 +402,11 @@ export default function TransactionsTable() {
         {/* Mobile Cards */}
         <div className="md:hidden divide-y divide-border">
           {paginatedTransactions.map((transaction) => (
-            <div key={transaction.id} className="p-4 hover:bg-secondary/50 transition-colors">
+            <div 
+              key={transaction.id} 
+              onClick={() => onViewDetails?.(transaction.id)}
+              className="p-4 hover:bg-secondary/50 transition-colors cursor-pointer"
+            >
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className={cn(
