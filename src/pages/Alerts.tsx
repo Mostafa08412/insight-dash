@@ -4,6 +4,7 @@ import { mockAlerts, mockProducts } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Input } from '@/components/ui/input';
+import { LowStockAlert } from '@/types/inventory';
 import {
   Select,
   SelectContent,
@@ -24,10 +25,14 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Badge } from '@/components/ui/badge';
+import AlertDetails from '@/pages/AlertDetails';
 
 const ITEMS_PER_PAGE_OPTIONS = [5, 10, 20, 50];
 
 export default function Alerts() {
+  const [alerts, setAlerts] = useState<LowStockAlert[]>(mockAlerts);
+  const [selectedAlert, setSelectedAlert] = useState<LowStockAlert | null>(null);
+
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [severityFilter, setSeverityFilter] = useState<string>('all');
@@ -43,16 +48,14 @@ export default function Alerts() {
 
   // Filter and sort alerts
   const filteredAlerts = useMemo(() => {
-    let result = [...mockAlerts];
+    let result = [...alerts];
 
-    // Search filter
     if (searchQuery) {
       result = result.filter(alert =>
         alert.productName.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
-    // Severity filter
     if (severityFilter !== 'all') {
       result = result.filter(alert => {
         const stockPercentage = (alert.currentStock / alert.threshold) * 100;
@@ -62,7 +65,6 @@ export default function Alerts() {
       });
     }
 
-    // Notification status filter
     if (notificationFilter !== 'all') {
       result = result.filter(alert => {
         if (notificationFilter === 'sent') return alert.alertSent;
@@ -71,7 +73,6 @@ export default function Alerts() {
       });
     }
 
-    // Stock range filter
     if (stockRangeFilter !== 'all') {
       result = result.filter(alert => {
         const stockPercentage = (alert.currentStock / alert.threshold) * 100;
@@ -83,7 +84,6 @@ export default function Alerts() {
       });
     }
 
-    // Date range filter
     if (dateFrom) {
       result = result.filter(alert => new Date(alert.date) >= dateFrom);
     }
@@ -91,7 +91,6 @@ export default function Alerts() {
       result = result.filter(alert => new Date(alert.date) <= dateTo);
     }
 
-    // Sort
     result.sort((a, b) => {
       const aPercentage = (a.currentStock / a.threshold) * 100;
       const bPercentage = (b.currentStock / b.threshold) * 100;
@@ -115,20 +114,17 @@ export default function Alerts() {
     });
 
     return result;
-  }, [searchQuery, severityFilter, notificationFilter, dateFrom, dateTo, stockRangeFilter, sortBy]);
+  }, [alerts, searchQuery, severityFilter, notificationFilter, dateFrom, dateTo, stockRangeFilter, sortBy]);
 
-  // Pagination calculations
   const totalPages = Math.ceil(filteredAlerts.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedAlerts = filteredAlerts.slice(startIndex, endIndex);
 
-  // Reset to first page when filters change
   const handleFilterChange = () => {
     setCurrentPage(1);
   };
 
-  // Count active filters
   const activeFiltersCount = [
     searchQuery,
     severityFilter !== 'all',
@@ -138,7 +134,6 @@ export default function Alerts() {
     dateTo,
   ].filter(Boolean).length;
 
-  // Clear all filters
   const clearAllFilters = () => {
     setSearchQuery('');
     setSeverityFilter('all');
@@ -150,10 +145,9 @@ export default function Alerts() {
     setCurrentPage(1);
   };
 
-  const criticalAlerts = mockAlerts.filter(a => (a.currentStock / a.threshold) < 0.3);
-  const warningAlerts = mockAlerts.filter(a => (a.currentStock / a.threshold) >= 0.3);
+  const criticalAlerts = alerts.filter(a => (a.currentStock / a.threshold) < 0.3);
+  const warningAlerts = alerts.filter(a => (a.currentStock / a.threshold) >= 0.3);
 
-  // Generate page numbers for pagination
   const getPageNumbers = () => {
     const pages: (number | 'ellipsis')[] = [];
     const maxVisible = 5;
@@ -185,6 +179,24 @@ export default function Alerts() {
     
     return pages;
   };
+
+  const handleDismissAlert = (alertId: string) => {
+    setAlerts(alerts.filter(a => a.id !== alertId));
+  };
+
+  // If viewing alert details
+  if (selectedAlert) {
+    return (
+      <AlertDetails
+        alert={selectedAlert}
+        onBack={() => setSelectedAlert(null)}
+        onDismiss={() => {
+          handleDismissAlert(selectedAlert.id);
+          setSelectedAlert(null);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -221,7 +233,7 @@ export default function Alerts() {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Healthy Stock</p>
-              <p className="text-2xl font-bold text-foreground">{mockProducts.length - mockAlerts.length}</p>
+              <p className="text-2xl font-bold text-foreground">{mockProducts.length - alerts.length}</p>
             </div>
           </div>
         </div>
@@ -248,7 +260,6 @@ export default function Alerts() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
@@ -262,7 +273,6 @@ export default function Alerts() {
             />
           </div>
 
-          {/* Severity Filter */}
           <Select value={severityFilter} onValueChange={(value) => {
             setSeverityFilter(value);
             handleFilterChange();
@@ -277,7 +287,6 @@ export default function Alerts() {
             </SelectContent>
           </Select>
 
-          {/* Notification Status Filter */}
           <Select value={notificationFilter} onValueChange={(value) => {
             setNotificationFilter(value);
             handleFilterChange();
@@ -292,7 +301,6 @@ export default function Alerts() {
             </SelectContent>
           </Select>
 
-          {/* Stock Range Filter */}
           <Select value={stockRangeFilter} onValueChange={(value) => {
             setStockRangeFilter(value);
             handleFilterChange();
@@ -309,7 +317,6 @@ export default function Alerts() {
             </SelectContent>
           </Select>
 
-          {/* Date From */}
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" className={cn("justify-start text-left font-normal", !dateFrom && "text-muted-foreground")}>
@@ -330,7 +337,6 @@ export default function Alerts() {
             </PopoverContent>
           </Popover>
 
-          {/* Date To */}
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" className={cn("justify-start text-left font-normal", !dateTo && "text-muted-foreground")}>
@@ -351,7 +357,6 @@ export default function Alerts() {
             </PopoverContent>
           </Popover>
 
-          {/* Sort By */}
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger>
               <SelectValue placeholder="Sort by" />
@@ -379,7 +384,7 @@ export default function Alerts() {
               <h3 className="text-lg font-semibold text-foreground">Stock Alerts</h3>
               <p className="text-sm text-muted-foreground">
                 Showing {paginatedAlerts.length} of {filteredAlerts.length} alerts
-                {filteredAlerts.length !== mockAlerts.length && ` (filtered from ${mockAlerts.length} total)`}
+                {filteredAlerts.length !== alerts.length && ` (filtered from ${alerts.length} total)`}
               </p>
             </div>
           </div>
@@ -402,7 +407,11 @@ export default function Alerts() {
               const isCritical = stockPercentage < 30;
 
               return (
-                <div key={alert.id} className="p-4 sm:p-6 table-row-hover">
+                <div 
+                  key={alert.id} 
+                  onClick={() => setSelectedAlert(alert)}
+                  className="p-4 sm:p-6 table-row-hover cursor-pointer"
+                >
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                     <div className="flex items-start gap-3 sm:gap-4">
                       <div className={cn(
@@ -438,28 +447,18 @@ export default function Alerts() {
                     </div>
 
                     <div className="flex items-center gap-2 ml-13 sm:ml-0 flex-shrink-0">
-                      <button className="px-3 py-1.5 sm:px-4 sm:py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-xs sm:text-sm font-medium">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); }}
+                        className="px-3 py-1.5 sm:px-4 sm:py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-xs sm:text-sm font-medium"
+                      >
                         Order Stock
                       </button>
-                      <button className="px-3 py-1.5 sm:px-4 sm:py-2 bg-secondary text-foreground rounded-lg hover:bg-accent transition-colors text-xs sm:text-sm font-medium">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); handleDismissAlert(alert.id); }}
+                        className="px-3 py-1.5 sm:px-4 sm:py-2 bg-secondary text-foreground rounded-lg hover:bg-accent transition-colors text-xs sm:text-sm font-medium"
+                      >
                         Dismiss
                       </button>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 ml-16">
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="text-muted-foreground">Stock Level</span>
-                      <span className="text-foreground font-medium">{alert.currentStock} / {alert.threshold} ({stockPercentage.toFixed(0)}%)</span>
-                    </div>
-                    <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                      <div
-                        className={cn(
-                          'h-full rounded-full transition-all duration-500',
-                          isCritical ? 'bg-destructive' : 'bg-warning'
-                        )}
-                        style={{ width: `${Math.min(stockPercentage, 100)}%` }}
-                      />
                     </div>
                   </div>
                 </div>
@@ -467,73 +466,71 @@ export default function Alerts() {
             })}
           </div>
         )}
-
-        {/* Pagination Footer */}
-        {filteredAlerts.length > 0 && (
-          <div className="p-4 border-t border-border">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              {/* Items per page */}
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>Show</span>
-                <Select value={String(itemsPerPage)} onValueChange={(value) => {
-                  setItemsPerPage(Number(value));
-                  setCurrentPage(1);
-                }}>
-                  <SelectTrigger className="w-[70px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ITEMS_PER_PAGE_OPTIONS.map(option => (
-                      <SelectItem key={option} value={String(option)}>{option}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <span>per page</span>
-              </div>
-
-              {/* Page info */}
-              <div className="text-sm text-muted-foreground">
-                Showing {startIndex + 1} to {Math.min(endIndex, filteredAlerts.length)} of {filteredAlerts.length} alerts
-              </div>
-
-              {/* Pagination */}
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                      className={cn(currentPage === 1 && 'pointer-events-none opacity-50', 'cursor-pointer')}
-                    />
-                  </PaginationItem>
-                  
-                  {getPageNumbers().map((page, index) => (
-                    <PaginationItem key={index}>
-                      {page === 'ellipsis' ? (
-                        <PaginationEllipsis />
-                      ) : (
-                        <PaginationLink
-                          isActive={currentPage === page}
-                          onClick={() => setCurrentPage(page)}
-                          className="cursor-pointer"
-                        >
-                          {page}
-                        </PaginationLink>
-                      )}
-                    </PaginationItem>
-                  ))}
-                  
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                      className={cn(currentPage === totalPages && 'pointer-events-none opacity-50', 'cursor-pointer')}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Pagination */}
+      {filteredAlerts.length > 0 && totalPages > 1 && (
+        <div className="bg-card border border-border rounded-xl p-4 animate-fade-in" style={{ animationDelay: '250ms' }}>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-muted-foreground">
+                Showing {startIndex + 1}-{Math.min(endIndex, filteredAlerts.length)} of {filteredAlerts.length}
+              </span>
+              <Select
+                value={itemsPerPage.toString()}
+                onValueChange={(value) => {
+                  setItemsPerPage(parseInt(value));
+                  setCurrentPage(1);
+                }}
+              >
+                <SelectTrigger className="w-[100px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ITEMS_PER_PAGE_OPTIONS.map((option) => (
+                    <SelectItem key={option} value={option.toString()}>
+                      {option} / page
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    className={cn(currentPage === 1 && 'pointer-events-none opacity-50')}
+                  />
+                </PaginationItem>
+                
+                {getPageNumbers().map((page, index) => (
+                  <PaginationItem key={index}>
+                    {page === 'ellipsis' ? (
+                      <PaginationEllipsis />
+                    ) : (
+                      <PaginationLink
+                        onClick={() => setCurrentPage(page)}
+                        isActive={currentPage === page}
+                      >
+                        {page}
+                      </PaginationLink>
+                    )}
+                  </PaginationItem>
+                ))}
+                
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    className={cn(currentPage === totalPages && 'pointer-events-none opacity-50')}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

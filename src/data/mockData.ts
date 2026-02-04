@@ -1,9 +1,11 @@
 import { Product, Category, Transaction, LowStockAlert, User, DashboardStats } from '@/types/inventory';
 
 export const mockUsers: User[] = [
-  { id: '1', name: 'Sarah Chen', email: 'sarah@company.com', role: 'admin', avatar: 'SC' },
-  { id: '2', name: 'Michael Torres', email: 'michael@company.com', role: 'manager', avatar: 'MT' },
-  { id: '3', name: 'Emily Johnson', email: 'emily@company.com', role: 'staff', avatar: 'EJ' },
+  { id: '1', name: 'Sarah Chen', email: 'sarah@company.com', role: 'admin', avatar: 'SC', status: 'active', createdAt: new Date('2023-06-15'), lastLogin: new Date('2024-01-21') },
+  { id: '2', name: 'Michael Torres', email: 'michael@company.com', role: 'manager', avatar: 'MT', status: 'active', createdAt: new Date('2023-08-20'), lastLogin: new Date('2024-01-20') },
+  { id: '3', name: 'Emily Johnson', email: 'emily@company.com', role: 'staff', avatar: 'EJ', status: 'active', createdAt: new Date('2023-10-01'), lastLogin: new Date('2024-01-19') },
+  { id: '4', name: 'David Kim', email: 'david@company.com', role: 'staff', avatar: 'DK', status: 'active', createdAt: new Date('2023-11-10'), lastLogin: new Date('2024-01-18') },
+  { id: '5', name: 'Jessica Wang', email: 'jessica@company.com', role: 'manager', avatar: 'JW', status: 'inactive', createdAt: new Date('2023-07-05') },
 ];
 
 export const mockCategories: Category[] = [

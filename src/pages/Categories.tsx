@@ -11,12 +11,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import AddCategoryModal from '@/components/categories/AddCategoryModal';
+import EditCategoryModal from '@/components/categories/EditCategoryModal';
+import DeleteCategoryDialog from '@/components/categories/DeleteCategoryDialog';
+import CategoryDetails from '@/pages/CategoryDetails';
 
 export default function Categories() {
   const { hasPermission } = useRole();
   const canManage = hasPermission(['admin']);
   
-  const [categories] = useState<Category[]>(mockCategories);
+  const [categories, setCategories] = useState<Category[]>(mockCategories);
   const [searchQuery, setSearchQuery] = useState('');
   const [productCountFilter, setProductCountFilter] = useState<'all' | '0-20' | '20-50' | '50-100' | '100+'>('all');
   const [sortBy, setSortBy] = useState<'name' | 'products'>('name');
@@ -25,10 +29,15 @@ export default function Categories() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(6);
 
+  // Modal states
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [deletingCategory, setDeletingCategory] = useState<Category | null>(null);
+  const [viewingCategory, setViewingCategory] = useState<Category | null>(null);
+
   const filteredCategories = useMemo(() => {
     let result = [...categories];
     
-    // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(cat => 
@@ -37,7 +46,6 @@ export default function Categories() {
       );
     }
     
-    // Product count filter
     if (productCountFilter !== 'all') {
       result = result.filter(cat => {
         switch (productCountFilter) {
@@ -50,7 +58,6 @@ export default function Categories() {
       });
     }
     
-    // Sorting
     result.sort((a, b) => {
       let comparison = 0;
       switch (sortBy) {
@@ -67,14 +74,12 @@ export default function Categories() {
     return result;
   }, [categories, searchQuery, productCountFilter, sortBy, sortOrder]);
 
-  // Pagination
   const totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
   const paginatedCategories = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return filteredCategories.slice(start, start + itemsPerPage);
   }, [filteredCategories, currentPage, itemsPerPage]);
 
-  // Reset to page 1 when filters change
   useMemo(() => {
     setCurrentPage(1);
   }, [searchQuery, productCountFilter]);
@@ -87,6 +92,24 @@ export default function Categories() {
   };
 
   const hasActiveFilters = searchQuery || productCountFilter !== 'all';
+
+  const handleAddCategory = (newCategory: { name: string; description: string }) => {
+    const category: Category = {
+      id: String(Date.now()),
+      name: newCategory.name,
+      description: newCategory.description,
+      productCount: 0,
+    };
+    setCategories([...categories, category]);
+  };
+
+  const handleEditCategory = (updatedCategory: Category) => {
+    setCategories(categories.map(c => c.id === updatedCategory.id ? updatedCategory : c));
+  };
+
+  const handleDeleteCategory = (categoryId: string) => {
+    setCategories(categories.filter(c => c.id !== categoryId));
+  };
 
   const getPageNumbers = () => {
     const pages: (number | 'ellipsis')[] = [];
@@ -104,6 +127,22 @@ export default function Categories() {
     return pages;
   };
 
+  // If viewing a category details page
+  if (viewingCategory) {
+    return (
+      <CategoryDetails
+        category={viewingCategory}
+        onBack={() => setViewingCategory(null)}
+        onEdit={() => {
+          setEditingCategory(viewingCategory);
+        }}
+        onDelete={() => {
+          setDeletingCategory(viewingCategory);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -113,7 +152,10 @@ export default function Categories() {
           <p className="text-sm text-muted-foreground">{filteredCategories.length} categories found</p>
         </div>
         {canManage && (
-          <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm">
+          <button 
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm"
+          >
             <Plus className="w-4 h-4" />
             Add Category
           </button>
@@ -123,7 +165,6 @@ export default function Categories() {
       {/* Filters */}
       <div className="bg-card border border-border rounded-xl p-4 animate-fade-in">
         <div className="space-y-3">
-          {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
@@ -135,7 +176,6 @@ export default function Categories() {
             />
           </div>
           
-          {/* Filter Row */}
           <div className="flex flex-wrap gap-3">
             <Select value={productCountFilter} onValueChange={(v) => setProductCountFilter(v as any)}>
               <SelectTrigger className="w-[160px] bg-secondary border-border">
@@ -184,7 +224,8 @@ export default function Categories() {
         {paginatedCategories.map((category, index) => (
           <div 
             key={category.id} 
-            className="bg-card border border-border rounded-xl p-6 hover:border-primary/50 transition-all duration-300 animate-fade-in group"
+            onClick={() => setViewingCategory(category)}
+            className="bg-card border border-border rounded-xl p-6 hover:border-primary/50 transition-all duration-300 animate-fade-in group cursor-pointer"
             style={{ animationDelay: `${index * 50}ms` }}
           >
             <div className="flex items-start justify-between mb-4">
@@ -193,10 +234,16 @@ export default function Categories() {
               </div>
               {canManage && (
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setEditingCategory(category); }}
+                    className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                  >
                     <Edit2 className="w-4 h-4" />
                   </button>
-                  <button className="p-2 rounded-lg hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-colors">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setDeletingCategory(category); }}
+                    className="p-2 rounded-lg hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-colors"
+                  >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -294,6 +341,37 @@ export default function Categories() {
           </div>
         </div>
       )}
+
+      {/* Modals */}
+      <AddCategoryModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onAdd={handleAddCategory}
+      />
+
+      <EditCategoryModal
+        isOpen={!!editingCategory}
+        category={editingCategory}
+        onClose={() => setEditingCategory(null)}
+        onSave={handleEditCategory}
+      />
+
+      <DeleteCategoryDialog
+        isOpen={!!deletingCategory}
+        category={deletingCategory}
+        onClose={() => {
+          setDeletingCategory(null);
+          if (viewingCategory?.id === deletingCategory?.id) {
+            setViewingCategory(null);
+          }
+        }}
+        onDelete={(id) => {
+          handleDeleteCategory(id);
+          if (viewingCategory?.id === id) {
+            setViewingCategory(null);
+          }
+        }}
+      />
     </div>
   );
 }
