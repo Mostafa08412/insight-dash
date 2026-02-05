@@ -1,3 +1,9 @@
+/**
+ * Transactions Page (Refactored)
+ * 
+ * Clean, composition-based page using the new architecture.
+ */
+
 import { useState } from 'react';
 import TransactionsTable from '@/components/transactions/TransactionsTable';
 import TransactionDetails from '@/pages/TransactionDetails';

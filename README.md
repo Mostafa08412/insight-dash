@@ -1,73 +1,122 @@
-# Welcome to your Lovable project
+# Inventory Management System - Frontend
 
-## Project info
+A modern React frontend for inventory management, built with TypeScript, Tailwind CSS, and shadcn/ui.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Tech Stack
 
-## How can I edit this code?
+- **React 18** - UI library
+- **TypeScript** - Type safety
+- **Vite** - Build tool
+- **Tailwind CSS** - Styling
+- **shadcn/ui** - UI components
+- **React Query** - Server state management
+- **React Router** - Routing
+- **Recharts** - Data visualization
 
-There are several ways of editing your application.
+## Architecture
 
-**Use Lovable**
+This project follows Clean Architecture principles with clear separation of concerns:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+```
+src/
+├── api/              # API client and service layer
+│   ├── client.ts     # HTTP client configuration
+│   ├── config.ts     # API configuration (mock vs real)
+│   ├── services/     # Domain-specific API services
+│   └── types/        # API request/response types
+├── components/       # React components
+│   ├── common/       # Reusable UI components
+│   ├── layout/       # Layout components
+│   ├── features/     # Feature-specific components
+│   └── ui/           # shadcn/ui base components
+├── contexts/         # React contexts
+├── hooks/            # Custom React hooks
+├── mocks/            # Mock data (for development)
+├── pages/            # Page components
+├── types/            # TypeScript type definitions
+└── lib/              # Utilities
+```
 
-Changes made via Lovable will be committed automatically to this repo.
+## Getting Started
 
-**Use your preferred IDE**
+### Prerequisites
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- Node.js 18+
+- npm or bun
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Installation
 
-Follow these steps:
+```bash
+npm install
+```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Development
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The app runs at `http://localhost:5173`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Mock Data vs Real API
 
-**Use GitHub Codespaces**
+The app supports both mock data and real API calls:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```env
+# .env
+VITE_USE_MOCK_DATA=true   # Use mock data (default)
+VITE_USE_MOCK_DATA=false  # Use real API
+VITE_API_BASE_URL=/api    # API base URL
+```
 
-## What technologies are used for this project?
+### Mock Data (Default)
 
-This project is built with:
+By default, the app uses mock data for development. This allows frontend development without a backend.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Real API
 
-## How can I deploy this project?
+When ready to integrate with a backend:
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+1. Set `VITE_USE_MOCK_DATA=false`
+2. Set `VITE_API_BASE_URL` to your API endpoint
+3. Ensure your API matches the expected contracts in `api/types/`
 
-## Can I connect a custom domain to my Lovable project?
+## Key Features
 
-Yes, you can!
+### Data Management
+- **Products** - Full CRUD with filtering, sorting, pagination
+- **Categories** - Category management with product counts
+- **Transactions** - Sales and purchase tracking
+- **Alerts** - Low stock alert management
+- **Users** - User management with roles
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### UI Features
+- Responsive design (mobile, tablet, desktop)
+- Dark/Light theme support
+- Real-time search with debouncing
+- Advanced filtering and sorting
+- Pagination with page size options
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## Documentation
+
+- [API Layer](src/api/README.md) - Services and API configuration
+- [Hooks](src/hooks/README.md) - Custom React hooks
+- [Components](src/components/README.md) - Reusable components
+
+## Scripts
+
+```bash
+npm run dev       # Start development server
+npm run build     # Build for production
+npm run preview   # Preview production build
+npm run lint      # Run ESLint
+npm run test      # Run tests
+```
+
+## Lovable Integration
+
+This project is built with [Lovable](https://lovable.dev). 
+
+To deploy, open your project in Lovable and click on Share -> Publish.
+
+To connect a custom domain, navigate to Project > Settings > Domains.
