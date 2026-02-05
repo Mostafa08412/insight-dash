@@ -1,3 +1,9 @@
+/**
+ * Products Page (Refactored)
+ * 
+ * Clean, composition-based page using the new architecture.
+ */
+
 import { useState } from 'react';
 import ProductsTable from '@/components/products/ProductsTable';
 import ProductDetails from '@/pages/ProductDetails';

@@ -1,4 +1,10 @@
-import { Package, DollarSign, ShoppingCart, TrendingUp, AlertTriangle } from 'lucide-react';
+/**
+ * Dashboard Page (Refactored)
+ * 
+ * Clean, composition-based dashboard using the new architecture.
+ */
+
+import { Package, DollarSign, TrendingUp, AlertTriangle } from 'lucide-react';
 import StatCard from '@/components/dashboard/StatCard';
 import SalesChart from '@/components/dashboard/SalesChart';
 import CategoryChart from '@/components/dashboard/CategoryChart';
@@ -13,7 +19,7 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ onNavigate }: DashboardProps) {
-  const { currentRole, hasPermission } = useRole();
+  const { hasPermission } = useRole();
   const stats = mockDashboardStats;
 
   return (
