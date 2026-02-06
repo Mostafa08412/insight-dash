@@ -11,7 +11,6 @@ import {
   ChevronDown,
   Menu
 } from 'lucide-react';
-import { useRole } from '@/contexts/RoleContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -28,18 +27,17 @@ interface NavItem {
   icon: React.ElementType;
   label: string;
   path: string;
-  roles: ('admin' | 'manager' | 'staff')[];
 }
 
 const navItems: NavItem[] = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: 'dashboard', roles: ['admin', 'manager', 'staff'] },
-  { icon: Package, label: 'Products', path: 'products', roles: ['admin', 'manager', 'staff'] },
-  { icon: ShoppingCart, label: 'Transactions', path: 'transactions', roles: ['admin', 'manager', 'staff'] },
-  { icon: AlertTriangle, label: 'Low Stock Alerts', path: 'alerts', roles: ['admin', 'manager', 'staff'] },
-  { icon: BarChart3, label: 'Reports', path: 'reports', roles: ['admin', 'manager'] },
-  { icon: FolderOpen, label: 'Categories', path: 'categories', roles: ['admin', 'manager'] },
-  { icon: Users, label: 'User Management', path: 'users', roles: ['admin'] },
-  { icon: Settings, label: 'Settings', path: 'settings', roles: ['admin'] },
+  { icon: LayoutDashboard, label: 'Dashboard', path: 'dashboard' },
+  { icon: Package, label: 'Products', path: 'products' },
+  { icon: ShoppingCart, label: 'Transactions', path: 'transactions' },
+  { icon: AlertTriangle, label: 'Low Stock Alerts', path: 'alerts' },
+  { icon: BarChart3, label: 'Reports', path: 'reports' },
+  { icon: FolderOpen, label: 'Categories', path: 'categories' },
+  { icon: Users, label: 'User Management', path: 'users' },
+  { icon: Settings, label: 'Settings', path: 'settings' },
 ];
 
 interface MobileSidebarProps {
@@ -48,10 +46,8 @@ interface MobileSidebarProps {
 }
 
 export default function MobileSidebar({ activePage, onNavigate }: MobileSidebarProps) {
-  const { currentUser, currentRole, setCurrentRole, hasPermission } = useRole();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
   const [open, setOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -59,14 +55,6 @@ export default function MobileSidebar({ activePage, onNavigate }: MobileSidebarP
     navigate('/auth');
     setOpen(false);
   };
-
-  const roleColors = {
-    admin: 'bg-destructive/20 text-destructive',
-    manager: 'bg-warning/20 text-warning',
-    staff: 'bg-info/20 text-info',
-  };
-
-  const filteredNavItems = navItems.filter(item => hasPermission(item.roles));
 
   const handleNavigate = (page: string) => {
     onNavigate(page);
@@ -96,11 +84,11 @@ export default function MobileSidebar({ activePage, onNavigate }: MobileSidebarP
           </div>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-thin max-h-[calc(100vh-280px)]">
-          {filteredNavItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activePage === item.path;
+         {/* Navigation */}
+         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-thin max-h-[calc(100vh-280px)]">
+           {navItems.map((item) => {
+             const Icon = item.icon;
+             const isActive = activePage === item.path;
             
             return (
               <button
@@ -116,70 +104,29 @@ export default function MobileSidebar({ activePage, onNavigate }: MobileSidebarP
               </button>
             );
           })}
-        </nav>
+         </nav>
 
-        {/* Role Switcher */}
-        <div className="px-3 py-2 border-t border-sidebar-border">
-          <p className="text-xs text-muted-foreground px-4 mb-2">Switch Role (Demo)</p>
-          <div className="relative">
-            <button
-              onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
-              className="w-full flex items-center justify-between px-4 py-2 rounded-lg bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent/80 transition-colors"
-            >
-              <span className="flex items-center gap-2">
-                <span className={cn('px-2 py-0.5 rounded text-xs font-medium', roleColors[currentRole])}>
-                  {currentRole.toUpperCase()}
-                </span>
-              </span>
-              <ChevronDown className={cn('w-4 h-4 transition-transform', roleDropdownOpen && 'rotate-180')} />
-            </button>
-            
-            {roleDropdownOpen && (
-              <div className="absolute bottom-full left-0 w-full mb-1 bg-card rounded-lg border border-border shadow-lg overflow-hidden animate-scale-in z-50">
-                {(['admin', 'manager', 'staff'] as const).map((role) => (
-                  <button
-                    key={role}
-                    onClick={() => {
-                      setCurrentRole(role);
-                      setRoleDropdownOpen(false);
-                    }}
-                    className={cn(
-                      'w-full px-4 py-2 text-left text-sm hover:bg-accent transition-colors flex items-center gap-2',
-                      currentRole === role && 'bg-accent'
-                    )}
-                  >
-                    <span className={cn('px-2 py-0.5 rounded text-xs font-medium', roleColors[role])}>
-                      {role.toUpperCase()}
-                    </span>
-                    <span className="text-muted-foreground text-xs">
-                      {role === 'admin' ? 'Full Access' : role === 'manager' ? 'Products & Reports' : 'View Only'}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* User Section */}
-        <div className="px-3 py-4 border-t border-sidebar-border">
-          <div className="flex items-center gap-3 px-4 py-2">
-            <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary font-medium text-sm">
-              {currentUser.avatar}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">{currentUser.name}</p>
-              <p className="text-xs text-muted-foreground truncate">{currentUser.email}</p>
-            </div>
-            <button 
-              onClick={handleLogout}
-              className="p-2 rounded-lg hover:bg-sidebar-accent text-muted-foreground hover:text-foreground transition-colors"
-              title="Sign out"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+         {/* User Section */}
+         <div className="px-3 py-4 border-t border-sidebar-border">
+           {user && (
+             <div className="flex items-center gap-3 px-4 py-2">
+               <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary font-medium text-sm">
+                 {(user.firstName?.[0] || '') + (user.lastName?.[0] || '')}
+               </div>
+               <div className="flex-1 min-w-0">
+                 <p className="text-sm font-medium text-foreground truncate">{user.firstName} {user.lastName}</p>
+                 <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+               </div>
+               <button 
+                 onClick={handleLogout}
+                 className="p-2 rounded-lg hover:bg-sidebar-accent text-muted-foreground hover:text-foreground transition-colors"
+                 title="Sign out"
+               >
+                 <LogOut className="w-4 h-4" />
+               </button>
+             </div>
+           )}
+         </div>
       </SheetContent>
     </Sheet>
   );

@@ -1,5 +1,5 @@
 import { Search, Bell } from 'lucide-react';
-import { useRole } from '@/contexts/RoleContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import { mockAlerts } from '@/data/mockData';
 import MobileSidebar from './MobileSidebar';
@@ -13,7 +13,7 @@ interface HeaderProps {
 }
 
 export default function Header({ title, subtitle, activePage, onNavigate }: HeaderProps) {
-  const { currentUser, currentRole } = useRole();
+  const { user } = useAuth();
   const [searchValue, setSearchValue] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -97,15 +97,17 @@ export default function Header({ title, subtitle, activePage, onNavigate }: Head
           </div>
 
           {/* User Avatar - Simplified on mobile */}
-          <div className="flex items-center gap-2 sm:gap-3 pl-2 sm:pl-4 border-l border-border">
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-medium text-foreground">{currentUser.name}</p>
-              <p className="text-xs text-muted-foreground capitalize">{currentRole}</p>
-            </div>
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold text-sm">
-              {currentUser.avatar}
-            </div>
-          </div>
+           {user && (
+             <div className="flex items-center gap-2 sm:gap-3 pl-2 sm:pl-4 border-l border-border">
+               <div className="text-right hidden sm:block">
+                 <p className="text-sm font-medium text-foreground">{user.firstName} {user.lastName}</p>
+                 <p className="text-xs text-muted-foreground">{user.email}</p>
+               </div>
+               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold text-sm">
+                 {(user.firstName?.[0] || '') + (user.lastName?.[0] || '')}
+               </div>
+             </div>
+           )}
         </div>
       </div>
     </header>
