@@ -11,8 +11,10 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { useRole } from '@/contexts/RoleContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface NavItem {
   icon: React.ElementType;
@@ -39,7 +41,14 @@ interface SidebarProps {
 
 export default function Sidebar({ activePage, onNavigate }: SidebarProps) {
   const { currentUser, currentRole, setCurrentRole, hasPermission } = useRole();
+  const { logout } = useAuth();
+  const navigate = useNavigate();
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/auth');
+  };
 
   const roleColors = {
     admin: 'bg-destructive/20 text-destructive',
@@ -137,7 +146,11 @@ export default function Sidebar({ activePage, onNavigate }: SidebarProps) {
             <p className="text-sm font-medium text-foreground truncate">{currentUser.name}</p>
             <p className="text-xs text-muted-foreground truncate">{currentUser.email}</p>
           </div>
-          <button className="p-2 rounded-lg hover:bg-sidebar-accent text-muted-foreground hover:text-foreground transition-colors">
+          <button 
+            onClick={handleLogout}
+            className="p-2 rounded-lg hover:bg-sidebar-accent text-muted-foreground hover:text-foreground transition-colors"
+            title="Sign out"
+          >
             <LogOut className="w-4 h-4" />
           </button>
         </div>
