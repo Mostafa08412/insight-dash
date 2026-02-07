@@ -1,6 +1,6 @@
 /**
  * Authentication Service
- * Handles all auth-related API calls
+ * Handles all auth-related API calls with mock user support
  */
 
 import { API_CONFIG } from '../config';
@@ -14,6 +14,7 @@ import {
   AuthenticationResponse,
   IdentityUserDto,
 } from '../types/auth.types';
+import { findUserByCredentials, MockAuthUser } from '@/data/mockUsers';
 
 const AUTH_ENDPOINTS = {
   login: '/auth/login',
@@ -28,11 +29,40 @@ const ACCESS_TOKEN_KEY = 'access_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
 const USER_KEY = 'auth_user';
 
+// Role mapping from our app roles to API roles
+const ROLE_MAPPING: Record<string, string> = {
+  admin: 'Admin',
+  manager: 'Manager',
+  staff: 'Staff',
+};
+
 class AuthService {
   private baseUrl: string;
 
   constructor() {
     this.baseUrl = API_CONFIG.baseUrl;
+  }
+
+  // Convert mock user to IdentityUserDto
+  private mockUserToIdentity(mockUser: MockAuthUser): IdentityUserDto {
+    return {
+      id: mockUser.id,
+      firstName: mockUser.firstName,
+      lastName: mockUser.lastName,
+      fullName: `${mockUser.firstName} ${mockUser.lastName}`,
+      email: mockUser.email,
+      userName: mockUser.email,
+      roles: [ROLE_MAPPING[mockUser.role] || 'Staff'],
+    };
+  }
+
+  // Create mock auth response
+  private createMockAuthResponse(mockUser: MockAuthUser): AuthenticationResponse {
+    return {
+      user: this.mockUserToIdentity(mockUser),
+      accessToken: { token: `mock_token_${mockUser.id}_${Date.now()}` },
+      refreshToken: { token: `mock_refresh_${mockUser.id}_${Date.now()}` },
+    };
   }
 
   private async request<T>(
@@ -106,6 +136,53 @@ class AuthService {
 
   // Auth API Methods
   async login(credentials: LoginRequest): Promise<AuthenticationResponseApiResponse> {
+    // Check for mock users first (for development/demo)
+    if (API_CONFIG.useMockData) {
+      const mockUser = findUserByCredentials(credentials.email, credentials.password);
+      
+      if (mockUser) {
+        if (mockUser.status !== 'active') {
+          return {
+            isSuccess: false,
+            message: 'Your account is inactive. Please contact an administrator.',
+            errorCode: 'ACCOUNT_INACTIVE',
+            validationErrors: null,
+            meta: null,
+            instance: null,
+            traceId: null,
+            data: null,
+          };
+        }
+
+        const authResponse = this.createMockAuthResponse(mockUser);
+        this.saveTokens(authResponse);
+        
+        return {
+          isSuccess: true,
+          message: 'Login successful',
+          errorCode: null,
+          validationErrors: null,
+          meta: null,
+          instance: null,
+          traceId: null,
+          data: authResponse,
+        };
+      }
+
+      // Mock user not found
+      return {
+        isSuccess: false,
+        message: 'Invalid email or password',
+        errorCode: 'INVALID_CREDENTIALS',
+        validationErrors: null,
+        meta: null,
+        instance: null,
+        traceId: null,
+        data: null,
+      };
+    }
+
+    // Real API call
     const response = await this.request<AuthenticationResponseApiResponse>(
       AUTH_ENDPOINTS.login,
       {

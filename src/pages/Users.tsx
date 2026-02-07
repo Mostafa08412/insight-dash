@@ -3,7 +3,9 @@ import { Plus, Edit2, Trash2, Shield, UserCheck, User as UserIcon, Search, Chevr
 import { mockUsers } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 import { User, UserRole, UserStatus } from '@/types/inventory';
-import { useRole } from '@/contexts/RoleContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { usePermissions } from '@/hooks/usePermissions';
+import { AccessDenied } from '@/components/auth/AccessDenied';
 import {
   Select,
   SelectContent,
@@ -17,7 +19,8 @@ import DeleteUserDialog from '@/components/users/DeleteUserDialog';
 import UserDetailsModal from '@/components/users/UserDetailsModal';
 
 export default function Users() {
-  const { currentUser } = useRole();
+  const { user: authUser } = useAuth();
+  const { canAccessPage, canPerformAction } = usePermissions();
   const [users, setUsers] = useState<User[]>(mockUsers);
 
   // Filter states
@@ -139,6 +142,14 @@ export default function Users() {
     return pages;
   };
 
+  // Check page access
+  if (!canAccessPage('users')) {
+    return <AccessDenied message="Only administrators can access User Management." />;
+  }
+
+  // Current user ID for self-protection checks
+  const currentUserId = authUser?.id || '';
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -147,13 +158,15 @@ export default function Users() {
           <h2 className="text-xl font-bold text-foreground">User Management</h2>
           <p className="text-sm text-muted-foreground">{filteredUsers.length} users found</p>
         </div>
-        <button 
-          onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm"
-        >
-          <Plus className="w-4 h-4" />
-          Add User
-        </button>
+        {canPerformAction('users.create') && (
+          <button 
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm"
+          >
+            <Plus className="w-4 h-4" />
+            Add User
+          </button>
+        )}
       </div>
 
       {/* Filters */}
@@ -501,7 +514,7 @@ export default function Users() {
       <EditUserModal
         isOpen={!!editingUser}
         user={editingUser}
-        currentUserId={currentUser.id}
+        currentUserId={currentUserId}
         onClose={() => setEditingUser(null)}
         onSave={handleEditUser}
       />
@@ -509,7 +522,7 @@ export default function Users() {
       <DeleteUserDialog
         isOpen={!!deletingUser}
         user={deletingUser}
-        currentUserId={currentUser.id}
+        currentUserId={currentUserId}
         onClose={() => setDeletingUser(null)}
         onDelete={handleDeleteUser}
       />

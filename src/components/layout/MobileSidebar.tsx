@@ -8,10 +8,10 @@ import {
   FolderOpen,
   Settings,
   LogOut,
-  ChevronDown,
   Menu
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePermissions } from '@/hooks/usePermissions';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -29,7 +29,7 @@ interface NavItem {
   path: string;
 }
 
-const navItems: NavItem[] = [
+const allNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: 'Dashboard', path: 'dashboard' },
   { icon: Package, label: 'Products', path: 'products' },
   { icon: ShoppingCart, label: 'Transactions', path: 'transactions' },
@@ -47,8 +47,12 @@ interface MobileSidebarProps {
 
 export default function MobileSidebar({ activePage, onNavigate }: MobileSidebarProps) {
   const { user, logout } = useAuth();
+  const { canAccessPage, roleInfo } = usePermissions();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+
+  // Filter nav items based on user permissions
+  const navItems = allNavItems.filter(item => canAccessPage(item.path));
 
   const handleLogout = async () => {
     await logout();
@@ -115,7 +119,7 @@ export default function MobileSidebar({ activePage, onNavigate }: MobileSidebarP
                </div>
                <div className="flex-1 min-w-0">
                  <p className="text-sm font-medium text-foreground truncate">{user.firstName} {user.lastName}</p>
-                 <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                 <p className="text-xs text-muted-foreground truncate">{roleInfo.label}</p>
                </div>
                <button 
                  onClick={handleLogout}
