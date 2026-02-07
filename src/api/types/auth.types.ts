@@ -4,6 +4,8 @@
  */
 
 // Request Types
+import { UserRole } from '@/types/inventory';
+
 export interface LoginRequest {
   email: string;
   password: string;

@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { RoleProvider } from '@/contexts/RoleContext';
+import { useState, useEffect } from 'react';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
 import Dashboard from '@/pages/Dashboard';
@@ -11,6 +10,8 @@ import Categories from '@/pages/Categories';
 import Users from '@/pages/Users';
 import Settings from '@/pages/Settings';
 import Profile from '@/pages/Profile';
+import { usePermissions } from '@/hooks/usePermissions';
+import { AccessDenied } from '@/components/auth/AccessDenied';
 
 const pageTitles: Record<string, { title: string; subtitle: string }> = {
   dashboard: { title: 'Dashboard', subtitle: 'Overview of your inventory management' },
@@ -26,8 +27,21 @@ const pageTitles: Record<string, { title: string; subtitle: string }> = {
 
 function InventoryApp() {
   const [activePage, setActivePage] = useState('dashboard');
+  const { canAccessPage, accessiblePages } = usePermissions();
+
+  // Redirect to accessible page if current page is not accessible
+  useEffect(() => {
+    if (!canAccessPage(activePage) && accessiblePages.length > 0) {
+      setActivePage(accessiblePages[0]);
+    }
+  }, [activePage, canAccessPage, accessiblePages]);
 
   const renderPage = () => {
+    // Check page access and show access denied for restricted pages
+    if (!canAccessPage(activePage)) {
+      return <AccessDenied onGoBack={() => setActivePage('dashboard')} />;
+    }
+
     switch (activePage) {
       case 'dashboard':
         return <Dashboard onNavigate={setActivePage} />;
@@ -74,9 +88,5 @@ function InventoryApp() {
 }
 
 export default function Index() {
-  return (
-    <RoleProvider>
-      <InventoryApp />
-    </RoleProvider>
-  );
+  return <InventoryApp />;
 }

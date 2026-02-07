@@ -1,22 +1,36 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { User, Mail, Phone, MapPin, Building, Camera, Save, Shield, Bell, Key } from 'lucide-react';
-import { useRole } from '@/contexts/RoleContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { usePermissions } from '@/hooks/usePermissions';
 import { toast } from 'sonner';
 
 export default function Profile() {
-  const { currentUser, currentRole } = useRole();
+  const { user } = useAuth();
+  const { role, roleInfo } = usePermissions();
   const [activeTab, setActiveTab] = useState('general');
   const [isEditing, setIsEditing] = useState(false);
 
   const [profile, setProfile] = useState({
-    fullName: currentUser?.name || 'John Doe',
-    email: currentUser?.email || 'john.doe@example.com',
+    fullName: '',
+    email: '',
     phone: '+1 (555) 123-4567',
     location: 'San Francisco, CA',
     company: 'InventoryPro Inc.',
     bio: 'Inventory manager with 5+ years of experience in supply chain management.',
-    avatar: currentUser?.avatar || '',
+    avatar: '',
   });
+
+  // Update profile when user changes
+  useEffect(() => {
+    if (user) {
+      setProfile(prev => ({
+        ...prev,
+        fullName: user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+        email: user.email || '',
+        avatar: (user.firstName?.[0] || '') + (user.lastName?.[0] || ''),
+      }));
+    }
+  }, [user]);
 
   const [notifications, setNotifications] = useState({
     lowStock: true,
@@ -63,8 +77,8 @@ export default function Profile() {
               </button>
             </div>
             <div className="flex-1">
-              <h2 className="text-xl font-bold text-foreground">{profile.fullName}</h2>
-              <p className="text-muted-foreground capitalize">{currentRole}</p>
+              <h2 className="text-xl font-bold text-foreground">{profile.fullName || 'User'}</h2>
+              <p className="text-muted-foreground">{roleInfo.label}</p>
             </div>
             <button
               onClick={() => isEditing ? handleSaveProfile() : setIsEditing(true)}

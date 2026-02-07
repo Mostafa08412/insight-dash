@@ -1,5 +1,6 @@
 import { Search, Bell } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePermissions } from '@/hooks/usePermissions';
 import { useState } from 'react';
 import { mockAlerts } from '@/data/mockData';
 import MobileSidebar from './MobileSidebar';
@@ -14,6 +15,7 @@ interface HeaderProps {
 
 export default function Header({ title, subtitle, activePage, onNavigate }: HeaderProps) {
   const { user } = useAuth();
+  const { roleInfo } = usePermissions();
   const [searchValue, setSearchValue] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -101,7 +103,7 @@ export default function Header({ title, subtitle, activePage, onNavigate }: Head
              <div className="flex items-center gap-2 sm:gap-3 pl-2 sm:pl-4 border-l border-border">
                <div className="text-right hidden sm:block">
                  <p className="text-sm font-medium text-foreground">{user.firstName} {user.lastName}</p>
-                 <p className="text-xs text-muted-foreground">{user.email}</p>
+                 <p className="text-xs text-muted-foreground">{roleInfo.label}</p>
                </div>
                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold text-sm">
                  {(user.firstName?.[0] || '') + (user.lastName?.[0] || '')}
